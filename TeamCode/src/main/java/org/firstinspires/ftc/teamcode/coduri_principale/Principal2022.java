@@ -35,13 +35,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
     Codul pentru controlat robotul in TeleOp
  */
 @TeleOp(name="Basic: Principal2022", group="Linear Opmode")
-@Disabled
+//@Disabled
 public class Principal2022 extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;
@@ -67,6 +68,8 @@ public class Principal2022 extends LinearOpMode {
     private CRServo Colectare = null;
     int contor = 0;
 
+    DigitalChannel SenzorAtingere;
+    //boolean SenzorAtinere1=SenzorAtingere.getState();
     //Senzor distanta:
 
     //private DistanceSensor sensorRange;
@@ -103,6 +106,8 @@ public class Principal2022 extends LinearOpMode {
 
         //cod servo:
         Colectare = hardwareMap.get(CRServo.class,"Colectare");
+
+        SenzorAtingere = hardwareMap.get(DigitalChannel.class, "senzor_atingere");
         waitForStart();
 
 
@@ -122,7 +127,8 @@ public class Principal2022 extends LinearOpMode {
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 */
-        telemetry.addData(">", "Press Start to begin" );
+        SenzorAtingere.setMode(DigitalChannel.Mode.INPUT);
+
         telemetry.update();
         waitForStart();
 
@@ -143,39 +149,56 @@ public class Principal2022 extends LinearOpMode {
 
             //cod brat:
             Brat_M.setPower(gamepad2.left_stick_y);
-            Cutie.setPower(gamepad2.right_stick_y*0.2);
+            Cutie.setPower(gamepad2.right_stick_y * 0.2);
 
             //cod servo:
-            if(gamepad2.x) {
+            if (gamepad2.x) {
                 Colectare.setPower(1);
                 contor = 2;
             }
-            if(gamepad2.b) {
+            if (gamepad2.b) {
                 Colectare.setPower(0);
                 contor = 1;
             }
-            if(gamepad2.y) {
+            if (gamepad2.y) {
                 Colectare.setPower(-1);
                 contor = 3;
             }
 
             //Afiseaza modul cutiei de prindere:
 
-            if(contor==1) {
-                telemetry.addData("Colectare","Stop");
+            if (contor == 1) {
+                telemetry.addData("Colectare", "Stop");
             }
-            if(contor==2) {
-                telemetry.addData("Colectare","ON Forward");
+            if (contor == 2) {
+                telemetry.addData("Colectare", "ON Forward");
             }
-            if(contor==3) {
-                telemetry.addData("Colectare","ON Reverse");
+            if (contor == 3) {
+                telemetry.addData("Colectare", "ON Reverse");
             }
             //cod motor masă:
 
-            if(gamepad2.left_bumper)
-                Carusel.setPower(0);
-            if(gamepad2.right_bumper)
+            // if(gamepad2.left_bumper)
+            //     Carusel.setPower(0);
+            // if(gamepad2.right_bumper)
+            //     Carusel.setPower(1);
+
+            if (SenzorAtingere.getState() == false) {
+                telemetry.addData("Digital Touch", "Is Not Pressed");
                 Carusel.setPower(1);
+            } else {
+                telemetry.addData("Digital Touch", "Is Pressed");
+                Carusel.setPower(0);
+            }
+            telemetry.update();
+        }
+       // if(SenzorAtingere.getState() == true){
+
+       //     }
+      //  else
+      //  {
+        //        Carusel.setPower(0);
+        //    }
 
             //Codare cu senzor culoare:
 
@@ -224,10 +247,7 @@ public class Principal2022 extends LinearOpMode {
             //telemetry.addData("velocity", Brat_M.getPower());
             //telemetry.addData("position", Brat_M.getCurrentPosition());
             //telemetry.addData("is at target", !Brat_M.isBusy());
-            telemetry.update();
 
-
-            waitForStart();
 
 
             telemetry.addData(">>", "Press start to continue");
@@ -239,4 +259,3 @@ public class Principal2022 extends LinearOpMode {
 
         }
     }
-}
